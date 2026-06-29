@@ -16,15 +16,13 @@ public class ExceptionHandler : IExceptionHandler
     
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, System.Exception exception, CancellationToken cancellationToken)
     {
-        //_logger.LogError(exception, "Exception not handle: {Message}", exception.Message);
-
         var problemDetailsContext = new ProblemDetailsContext
         {
             HttpContext = httpContext,
             Exception = exception,
             ProblemDetails = exception switch
             {
-                NotFoundException => CreateProblemDetails(StatusCodes.Status404NotFound, "Resourse not found", exception),
+                ExceptionService exceptionService=> CreateProblemDetails(exceptionService.statusCode, exceptionService.title, exception),
                 _ => CreateProblemDetails(StatusCodes.Status500InternalServerError, "Internal server error", exception)
             }
         };
