@@ -1,4 +1,5 @@
 using System.Data;
+using gestionUsuarios.Exception;
 using gestionUsuarios.Respository;
 using gestionUsuarios.Services;
 using Npgsql;
@@ -12,6 +13,8 @@ builder.Services.AddTransient<IDbConnection>((sp)=> new NpgsqlConnection(connect
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>() ;
 
+builder.Services.AddExceptionHandler<ExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Add services to the container.
 
@@ -33,4 +36,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseExceptionHandler();
 app.Run();
