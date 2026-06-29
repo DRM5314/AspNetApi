@@ -1,3 +1,4 @@
+using gestionUsuarios.Exception;
 using gestionUsuarios.Models;
 using gestionUsuarios.Respository;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,7 @@ public class UserService
         var user = await _userRepository.GetUserById(id);
         if (user == null)
         {
-            Console.WriteLine("User dont exist");
+            throw new NotFoundException($"User with id: {id} not found");
         }
         var userResponse = new UserCreateResponseDTO(user);
         return userResponse;
@@ -40,7 +41,7 @@ public class UserService
         var user = await _userRepository.GetUserById(id);
         if (user == null)
         {
-            Console.WriteLine("User dont exist");
+            throw new NotFoundException($"User with id: {id} not found");
         }
 
         user.setName(userCreateRequest.name);
