@@ -1,3 +1,4 @@
+using gestionUsuarios.Enum;
 using gestionUsuarios.Models;
 
 namespace gestionUsuarios.Respository;
@@ -13,16 +14,52 @@ public class UserRepository : IUserRepository
         _dbConnection = dbConnection;
     }
 
-    public async Task<IEnumerable<Models.User>> GetAllUsers()
+    private async Task<IEnumerable<User>> dynamicQueryGetUser(string filter = "", object? param = null)
     {
-        const string sql = "SELECT * FROM user_";
-        return await _dbConnection.QueryAsync<Models.User>(sql);
+        string sql = $@"SELECT u.id, u.name, u.lastname, u.email, r.code FROM user_ u
+                             left join userroles ur on u.id = ur.userid
+                             left join role r on ur.rolid = r.id
+                             {filter}";
+        
+        var userDictionary = new Dictionary<int, User>();
+
+
+        await _dbConnection.QueryAsync<User, RoleRow, User>(
+            sql, (user, roleRow) =>
+            {
+                if (!userDictionary.TryGetValue(user.id, out var userExist))
+                {
+                    userExist = user;
+                    userDictionary.Add(userExist.id, userExist);
+                }
+
+                if (roleRow != null)
+                {
+                    userExist.roles.Add(roleRow.Code);
+                }
+                return userExist;
+            },
+            param,
+            splitOn:"code"
+        );
+        return userDictionary.Values;
+    }
+
+public async Task<IEnumerable<Models.User>> GetAllUsers()
+    {
+        /*
+         Consult original to obtains users with role (Code not id in postgres)
+         select  u.name, u.lastname, r.code from user_ u 
+            left join userroles ur on u.id = ur.userid 
+            left join role r on ur.rolid = r.id;
+         */
+        return await dynamicQueryGetUser();
     }
 
     public async Task<Models.User> GetUserById(int id)
     {
-        const string sql = @"SELECT * FROM user_ WHERE id = @id";
-        return await _dbConnection.QueryFirstOrDefaultAsync<Models.User>(sql, new { id });
+        var result = await dynamicQueryGetUser("where u.id = @id", new { id = id});
+        return result.FirstOrDefault();
     }
 
     public async Task<int> CreateUser(UserCreateRequestDTO user)

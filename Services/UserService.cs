@@ -1,3 +1,4 @@
+using gestionUsuarios.Enum;
 using gestionUsuarios.Exception;
 using gestionUsuarios.Models;
 using gestionUsuarios.Respository;
@@ -7,7 +8,7 @@ namespace gestionUsuarios.Services;
 
 public class UserService
 {
-    private readonly IUserRepository  _userRepository;
+    private readonly IUserRepository _userRepository;
 
     public UserService(IUserRepository userRepository)
     {
@@ -24,14 +25,16 @@ public class UserService
     {
         return await _userRepository.CreateUser(userCreateRequest);
     }
-    
-    
-    public async Task <UserCreateResponseDTO> FindById(int id){
+
+
+    public async Task<UserCreateResponseDTO> FindById(int id)
+    {
         var user = await _userRepository.GetUserById(id);
         if (user == null)
         {
             throw new NotFoundException($"User with id: {id} not found");
         }
+
         var userResponse = new UserCreateResponseDTO(user);
         return userResponse;
     }
