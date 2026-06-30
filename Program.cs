@@ -1,10 +1,17 @@
 using System.Data;
+using System.Text.Json.Serialization;
 using gestionUsuarios.Exception;
 using gestionUsuarios.Respository;
 using gestionUsuarios.Services;
 using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 //Read the conection
 var connectionString = builder.Configuration.GetConnectionString("PostgresConection");

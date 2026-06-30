@@ -1,3 +1,5 @@
+using gestionUsuarios.Enum;
+
 namespace gestionUsuarios.Models;
 
 public class User
@@ -6,6 +8,8 @@ public class User
     public String name { get; private set; }
     public String lastName { get; private set; }
     public String email { get; private set; }
+    
+    public HashSet<RoleType> roles { get; private set; } = new HashSet<RoleType>();
 
     public void setName(string name)
     {
@@ -21,6 +25,11 @@ public class User
     {
         this.email = email;
     }
+
+    public void setRoles(HashSet<RoleType> roles)
+    {
+        this.roles = roles;
+    }
 }
 
 public class UserCreateRequestDTO
@@ -28,14 +37,19 @@ public class UserCreateRequestDTO
     public string name { get; set; }
     public string lastName { get; set; }
     public string email { get; set; }
+    public HashSet<RoleType> roles { get; set; }
 }
 
 public class UserCreateResponseDTO
 {
     public string name { get; }
+    public string email { get;}
+    public HashSet<RoleType> roles { get; }
 
     public UserCreateResponseDTO(User user)
     {
         this.name = user.name;
+        this.email = user.email;
+        this.roles =(user.roles);
     }
 }
