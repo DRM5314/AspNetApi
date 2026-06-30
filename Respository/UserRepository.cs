@@ -64,10 +64,39 @@ public async Task<IEnumerable<Models.User>> GetAllUsers()
 
     public async Task<int> CreateUser(UserCreateRequestDTO user)
     {
-        const String sql = @"INSERT INTO user_ (name, lastName, email)
+        if(_dbConnection.State  != ConnectionState.Open)
+            _dbConnection.Open();
+        var transaction =  _dbConnection.BeginTransaction();
+        try
+        {
+            const String sql = @"INSERT INTO user_ (name, lastName, email)
                            VALUES (@name, @lastName, @email)
-                           ;";
-        return  await _dbConnection.ExecuteScalarAsync<int>(sql, user);
+                           RETURNING id;";
+            int newUserId = await _dbConnection.ExecuteScalarAsync<int>(sql, 
+                new { name = user.name, lastName = user.lastName, email = user.email }
+                ,transaction);
+            if (user.roles != null && user.roles.Any())
+            {
+                const string sqlRoleId = @"SELECT id from role where code = @code";
+                var usersInsert = new List<Object>();
+                foreach (var role in user.roles)
+                {
+                    int rolId = await _dbConnection.ExecuteScalarAsync<int>(sqlRoleId,
+                        new { code = role.ToString() },transaction);
+                    usersInsert.Add(new { userid = newUserId, rolid = rolId });
+                }
+                const String sqlUserRoles = @"INSERT INTO userroles (userid,rolid) VALUES (@userid, @rolid)";
+                await _dbConnection.ExecuteAsync(sqlUserRoles,usersInsert,transaction);
+            }
+            transaction.Commit();
+            return newUserId;
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine(ex);
+            transaction.Rollback();
+            throw;
+        }
     }
 
     public async Task<int> UpdateUser(int id, Models.User user)

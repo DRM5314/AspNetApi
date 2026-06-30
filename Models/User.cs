@@ -32,6 +32,7 @@ public class UserCreateRequestDTO
     public string name { get; set; }
     public string lastName { get; set; }
     public string email { get; set; }
+    public HashSet<RoleType> roles { get; set; }
 }
 
 public class UserCreateResponseDTO
