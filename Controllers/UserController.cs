@@ -1,5 +1,6 @@
 using gestionUsuarios.Models;
 using gestionUsuarios.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace gestionUsuarios.Controllers;
@@ -15,6 +16,7 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
+    [Authorize(Roles = "USER")]
     [HttpGet]
     public async Task<IActionResult> GetAllUsers()
     {
@@ -22,13 +24,15 @@ public class UserController : ControllerBase
         return Ok(users);
     }
 
+    [Authorize(Roles = "USER")]
     [HttpGet("{id}")]
-
-public async Task<IActionResult> GetUserById(int id)
+    public async Task<IActionResult> GetUserById(int id)
     {
         var user = await _userService.FindById(id);
         return Ok(user);
     }
+    
+    [Authorize(Roles = "ADMIN")]
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] UserCreateRequestDTO dto)
     {
@@ -41,6 +45,7 @@ public async Task<IActionResult> GetUserById(int id)
         return CreatedAtAction(nameof(CreateUser), new { userCreated }, userCreated);
     }
 
+    [Authorize(Roles = "ADMIN")]
     [HttpPut (("{id}"))]
     public async Task<IActionResult> UpdateUser(int id, [FromBody] UserCreateRequestDTO dto)
     {
