@@ -50,6 +50,7 @@ public class UserService
         user.setName(userCreateRequest.name);
         user.setLastName(userCreateRequest.lastName);
         user.setEmail(userCreateRequest.email);
+        user.setRoles(userCreateRequest.roles);
 
         var rowsAffecter = await _userRepository.UpdateUser(id, user);
         return rowsAffecter;

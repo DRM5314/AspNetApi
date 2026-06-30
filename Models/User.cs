@@ -25,6 +25,11 @@ public class User
     {
         this.email = email;
     }
+
+    public void setRoles(HashSet<RoleType> roles)
+    {
+        this.roles = roles;
+    }
 }
 
 public class UserCreateRequestDTO
